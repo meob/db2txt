@@ -1,11 +1,11 @@
 select 'ch2txt: ClickHouse TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
-       'v.1.0.0' as version;
+       'v.1.0.1' as version;
 
 
 use system;
-select 'Version :' as item, version() as value
+select 'Version :' as summary_info, version() as value
 union all
 select 'Created :', toString(min(metadata_modification_time))
   from system.tables
@@ -71,13 +71,13 @@ union all
 select ' Desupported:      22.8.21.38-lts, 22.3.20.29−lts, 21.8.15.7-lts', 4)
 order by ord;
 
-select  sk as database,
+select  sk as schema_matrix,
 	sum(if(otype='T',1,0)) as tables,
 	sum(if(otype='C',1,0)) as columns,
 	sum(if(otype='A',1,0)) as partitions,
 	sum(if(otype='P',1,0)) as parts,
 	sum(if(otype='R',1,0)) as replicas,
-	sum(if(otype='D',1,0)) as dctionaries,
+	sum(if(otype='D',1,0)) as dictionaries,
 	count(*) as TOTAL
 from ( select 'T' otype, database sk, name
   from system.tables
@@ -167,7 +167,7 @@ select 'TOTAL',
 	count(*)
   from system.tables;
 
-select name as user_name, 
+select name as user_list, 
        auth_type,
        host_names, -- host_ip, host_names_regexp, host_names_like,
        default_roles_all, default_roles_list, default_roles_except,
@@ -208,9 +208,9 @@ SELECT 'TOTAL', sum(rows),
   FROM system.parts;
 
 SELECT name as disk_name, path,
-       formatReadableSize(total_space),
-       formatReadableSize(free_space),
-       formatReadableSize(total_space-free_space),
+       formatReadableSize(total_space) as total_space,
+       formatReadableSize(free_space) as free_space,
+       formatReadableSize(total_space-free_space) as used_space,
        total_space, 
        free_space, 
        total_space-free_space
@@ -276,7 +276,7 @@ select name as tuning_parameter, value
 SELECT user, client_hostname AS host, client_name AS client,
        query_start_time AS started, query_duration_ms/1000 AS sec,
        memory_usage, type,
-       query
+       query as query_top_memory
   FROM system.query_log
  WHERE memory_usage<>0
    and event_time > now() - interval 7 day
@@ -299,9 +299,9 @@ select query_id,
 	user,
 	address,
 	elapsed,
-	substring(query,1,128) running_queries
+	substring(query,1,128) current_query
   from system.processes
- where query not like ('% running_queriese%')
+ where query not like ('% current_query%')
  order by query_id;
 
 SELECT user, client_hostname AS host, client_name AS client,
@@ -498,7 +498,8 @@ select  database,
   from system.tables
  where engine='Kafka'
  group by database
- order by database;
+ order by database
+union all
 select 'TOTAL', count(*)
   from system.tables
  where engine='Kafka';
@@ -516,7 +517,7 @@ SELECT database, table as kafka_table,
        exceptions.time, exceptions.text    
   FROM system.kafka_consumers
  WHERE notEmpty(exceptions.time)
- ORDER BY exceptions.time[-1] desc, database, table;
+ ORDER BY exceptions.time[-1] desc, database, table limit 10;
 
 SELECT name as zookeeper_name, value, ctime, path
   FROM system.zookeeper
@@ -543,18 +544,18 @@ SELECT database, table,sum(rows),
 SELECT database, name,
        formatReadableSize(total_bytes),
        engine, 
-       substring(create_table_query,
+       substring(substring(create_table_query,
                  position(create_table_query, 'TTL'),
-                 position(create_table_query, 'SETTING')-position(create_table_query, 'TTL') ) as ttl_def
+                 position(create_table_query, 'SETTING')-position(create_table_query, 'TTL') ),1,32) as ttl_def
   FROM system.tables
  where engine not in ('View','MaterializedView', 'Kafka', 'Dictionary')
    and engine not like 'System%'
  ORDER BY database, name;
 
 SELECT database, table,
-       count(distinct partition), min(partition), max(partition),
-       count(distinct name), min(name), max(name),
-       sum(active), sum(bytes_on_disk)
+       count(distinct partition) as partitions, min(partition) as min_partt, max(partition) as max_partt,
+       count(distinct name) as parts, min(name) as min_part, max(name) as max_part,
+       sum(active) as active, sum(bytes_on_disk) as bytes
   FROM system.parts
  GROUP BY database, table
  ORDER BY database, table;
@@ -585,21 +586,25 @@ select name, code, value,
        remote
   from system.errors;
 
-select name, value, changed
+select name as all_parameters, value, changed
   from system.settings
- order by changed desc, name;
+ order by changed desc, name
+ limit 20;
 
-select metric, value,  description
+select metric as global_status, value,  description
   from system.metrics
- order by metric;
+ order by metric
+ limit 20;
 
 select metric, value
   from system.asynchronous_metrics
- order by metric;
+ order by metric
+ limit 20;
 
 select event, value, description
   from system.events
- order by event;
+ order by event
+ limit 20;
 
 
 select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;

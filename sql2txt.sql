@@ -1,4 +1,4 @@
-select 'pg2txt: PostgreSQL TXT-Report on: '||current_database() as title,
+select 'sql2txt: SQL Server TXT-Report on: '||current_database() as title,
        now() as report_date,
        user as by_user,
        'v.1.0.1' as version;
@@ -915,7 +915,7 @@ select archived_count, last_archived_wal,
                   OR last_failed_wal <= last_archived_wal) as archiving,
         round((CAST (archived_count AS NUMERIC)*60 / EXTRACT (EPOCH FROM age(now(), stats_reset)))::numeric,6) as wals_pm
   from pg_stat_archiver;
-select name as replication_parameter, substring(setting, 1,80) as setting
+select name as replication_parameter, substring(setting, 1,60) as setting
  from pg_settings
  where name in ('wal_level', 'archive_command', 'hot_standby', 'max_wal_senders', 'checkpoint_segments', 'max_wal_size', 'archive_mode', 
                 'max_standby_archive_delay', 'max_standby_streaming_delay', 'hot_standby_feedback', 'synchronous_commit',
@@ -1018,3 +1018,18 @@ order by name;
 
 select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', now()) as report_date;
+
+
+SELECT DISTINCT CONVERT(decimal(18,2),
+ migs.user_seeks * migs.avg_total_user_cost * (migs.avg_user_impact * 0.01)) AS [index_advantage],
+ migs.last_user_seek, mid.[statement] AS [Database.Schema.Table],
+ mid.equality_columns, mid.inequality_columns, mid.included_columns,
+ migs.user_seeks, migs.avg_total_user_cost, migs.avg_user_impact,
+ OBJECT_NAME(mid.[object_id]) AS [Table Name], p.rows AS [Table Rows]
+FROM sys.dm_db_missing_index_group_stats AS migs WITH (NOLOCK)
+INNER JOIN sys.dm_db_missing_index_groups AS mig WITH (NOLOCK) ON migs.group_handle = mig.index_group_handle
+INNER JOIN sys.dm_db_missing_index_details AS mid WITH (NOLOCK) ON mig.index_handle = mid.index_handle
+INNER JOIN sys.partitions AS p WITH (NOLOCK) ON p.[object_id] = mid.[object_id]
+WHERE mid.database_id = DB_ID()
+  AND p.index_id < 2
+ORDER BY index_advantage DESC OPTION (RECOMPILE)

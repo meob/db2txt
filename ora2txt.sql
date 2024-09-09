@@ -1,12 +1,12 @@
 select 'ora2txt: Oracle TXT-Report on: '|| value||' ' as title,
        to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') as report_date,
        user as by_user,
-       'v.1.0.0' as version
+       'v.1.0.1' as version
   from v$parameter
  where name like 'db_name';
 
  
-select ' Database :' as item,
+select ' Database :' as summary_info,
            value as value
 from v$parameter
 where name like 'db_name'
@@ -37,18 +37,18 @@ select ' Log archiving :',
 from v$database
 union all
 select ' Defined Users / OPEN:',
-           to_char(count(*),'999999999999')
- ||' / '|| to_char(sum(decode(account_status,'OPEN',1,0)),'999999999999')
+           to_char(count(*),'999999999')
+ ||' / '|| to_char(sum(decode(account_status,'OPEN',1,0)),'999999999')
 from sys.dba_users
 union all
 select ' Defined Schemata :', 
-           to_char(count(distinct owner),'999999999')
+           to_char(count(distinct owner),'999999')
 from dba_objects
 where owner not in ('SYS', 'SYSTEM')
 and object_type = 'TABLE'
 union all
 select ' Defined Tables :', 
-           to_char(count(*),'999999999999')
+           to_char(count(*),'999999999')
 from dba_objects
 where owner not in ('SYS', 'SYSTEM')
 and object_type = 'TABLE'
@@ -58,9 +58,9 @@ select ' Used Space (MB) :',
 from sys.dba_extents
 union all
 select ' Sessions / USER / ACTIVE:', 
-           to_char(count(*),'999999999999')||
-  ' / ' || to_char(sum(decode(type, 'USER', 1, 0)),'999999999999')||
-  ' / ' || to_char(sum(decode(status, 'ACTIVE', 1, 0)),'999999999999')
+           to_char(count(*),'999999999')||
+  ' / ' || to_char(sum(decode(type, 'USER', 1, 0)),'999999999')||
+  ' / ' || to_char(sum(decode(status, 'ACTIVE', 1, 0)),'999999999')
 from gv$session
 union all
 select ' Active Users Sessions:', 
@@ -109,6 +109,59 @@ union all
 SELECT description ||' on '||TO_CHAR(action_time, 'DD-MON-YYYY HH24:MI:SS')|| ' with Patch ID: '||patch_id
   FROM sys.dba_registry_sqlpatch;
 
+SELECT * FROM (
+select rpad(owner,20) schema_matrix,
+           sum(decode(object_type, 'TABLE',1,0))    tabs,
+           sum(decode(object_type, 'TABLE PARTITION',1,0))    patrs,
+           sum(decode(object_type, 'INDEX',1,0))    idxs,
+           sum(decode(object_type, 'TRIGGER',1,0))  trgs,
+           sum(decode(object_type, 'PACKAGE',1,0))  pkgs,
+           sum(decode(object_type, 'PACKAGE BODY',1,0))  pbod,
+           sum(decode(object_type, 'PROCEDURE',1,0))  proc,
+           sum(decode(object_type, 'FUNCTION',1,0))  func,
+           sum(decode(object_type, 'SEQUENCE',1,0)) seqs,
+           sum(decode(object_type, 'SYNONYM',1,0))  syns,
+           sum(decode(object_type, 'VIEW',1,0))  viws,
+           sum(decode(object_type, 'MATERIALIZED VIEW',1,0))  mvs,
+           sum(decode(object_type, 'JOB',1,0))  jbs,
+           sum(decode(object_type, 'TYPE',1,0))  typ,
+           sum(decode(object_type, 'OPERATOR',1,0))  oper,
+           sum(decode(object_type, 'LOB',1,0))  lobb,
+           sum(decode(object_type, 'XML SCHEMA',1,0))  xml,
+           count(*) alls
+from sys.dba_objects
+group by owner
+order by owner )
+UNION ALL
+select rpad('TOTAL',20) total,
+           sum(decode(object_type, 'TABLE',1,0))    tabs,
+           sum(decode(object_type, 'TABLE PARTITION',1,0))    patrs,
+           sum(decode(object_type, 'INDEX',1,0))    idxs,
+           sum(decode(object_type, 'TRIGGER',1,0))  trgs,
+           sum(decode(object_type, 'PACKAGE',1,0))  pkgs,
+           sum(decode(object_type, 'PACKAGE BODY',1,0))  pbod,
+           sum(decode(object_type, 'PROCEDURE',1,0))  proc,
+           sum(decode(object_type, 'FUNCTION',1,0))  func,
+           sum(decode(object_type, 'SEQUENCE',1,0)) seqs,
+           sum(decode(object_type, 'SYNONYM',1,0))  syns,
+           sum(decode(object_type, 'VIEW',1,0))  viws,
+           sum(decode(object_type, 'MATERIALIZED VIEW',1,0))  mvs,
+           sum(decode(object_type, 'JOB',1,0))  jbs,
+           sum(decode(object_type, 'TYPE',1,0))  typ,
+           sum(decode(object_type, 'OPERATOR',1,0))  oper,
+           sum(decode(object_type, 'LOB',1,0))  lobb,
+           sum(decode(object_type, 'XML SCHEMA',1,0))  xml,
+           count(*) alls
+from sys.dba_objects;
+
+select owner,
+       to_char(sum(decode(segment_type, 'TABLE',bytes,0)),'999,999,999,999,999')    tabs,
+       to_char(sum(decode(segment_type, 'INDEX', bytes,0)),'999,999,999,999,999')    idxs,
+       to_char(sum(bytes),'999,999,999,999,999') tot
+  from sys.dba_segments
+ group by owner
+ order by owner;
+
 select TABLESPACE_NAME, USED_SPACE, TABLESPACE_SIZE, round(USED_PERCENT, -3) as USED_PERCENT
   from dba_tablespace_usage_metrics
  order by TABLESPACE_NAME;
@@ -138,57 +191,6 @@ select rpad(segment_type, 10) as segment_type,
 SELECT TABLESPACE_NAME as temp_tablespace_name, TABLESPACE_SIZE, ALLOCATED_SPACE, FREE_SPACE 
   FROM dba_temp_free_space
  order by TABLESPACE_NAME;
-
-select rpad(owner,20) owner,
-           sum(decode(object_type, 'TABLE',1,0))    tabs,
-           sum(decode(object_type, 'TABLE PARTITION',1,0))    patrs,
-           sum(decode(object_type, 'INDEX',1,0))    idxs,
-           sum(decode(object_type, 'TRIGGER',1,0))  trgs,
-           sum(decode(object_type, 'PACKAGE',1,0))  pkgs,
-           sum(decode(object_type, 'PACKAGE BODY',1,0))  pbod,
-           sum(decode(object_type, 'PROCEDURE',1,0))  proc,
-           sum(decode(object_type, 'FUNCTION',1,0))  func,
-           sum(decode(object_type, 'SEQUENCE',1,0)) seqs,
-           sum(decode(object_type, 'SYNONYM',1,0))  syns,
-           sum(decode(object_type, 'VIEW',1,0))  viws,
-           sum(decode(object_type, 'MATERIALIZED VIEW',1,0))  mvs,
-           sum(decode(object_type, 'JOB',1,0))  jbs,
-           sum(decode(object_type, 'TYPE',1,0))  typ,
-           sum(decode(object_type, 'OPERATOR',1,0))  oper,
-           sum(decode(object_type, 'LOB',1,0))  lobb,
-           sum(decode(object_type, 'XML SCHEMA',1,0))  xml,
-           count(*) alls
-from sys.dba_objects
-group by owner
-order by owner;
-select rpad('TOTAL',20) total,
-           sum(decode(object_type, 'TABLE',1,0))    tabs,
-           sum(decode(object_type, 'TABLE PARTITION',1,0))    patrs,
-           sum(decode(object_type, 'INDEX',1,0))    idxs,
-           sum(decode(object_type, 'TRIGGER',1,0))  trgs,
-           sum(decode(object_type, 'PACKAGE',1,0))  pkgs,
-           sum(decode(object_type, 'PACKAGE BODY',1,0))  pbod,
-           sum(decode(object_type, 'PROCEDURE',1,0))  proc,
-           sum(decode(object_type, 'FUNCTION',1,0))  func,
-           sum(decode(object_type, 'SEQUENCE',1,0)) seqs,
-           sum(decode(object_type, 'SYNONYM',1,0))  syns,
-           sum(decode(object_type, 'VIEW',1,0))  viws,
-           sum(decode(object_type, 'MATERIALIZED VIEW',1,0))  mvs,
-           sum(decode(object_type, 'JOB',1,0))  jbs,
-           sum(decode(object_type, 'TYPE',1,0))  typ,
-           sum(decode(object_type, 'OPERATOR',1,0))  oper,
-           sum(decode(object_type, 'LOB',1,0))  lobb,
-           sum(decode(object_type, 'XML SCHEMA',1,0))  xml,
-           count(*) alls
-from sys.dba_objects;
-
-select owner,
-       to_char(sum(decode(segment_type, 'TABLE',bytes,0)),'999,999,999,999,999')    tabs,
-       to_char(sum(decode(segment_type, 'INDEX', bytes,0)),'999,999,999,999,999')    idxs,
-       to_char(sum(bytes),'999,999,999,999,999') tot
-  from sys.dba_segments
- group by owner
- order by owner;
 
 select 
  owner,
@@ -640,10 +642,10 @@ select owner, type,
 select owner, library_name, file_spec, status, dynamic
   from all_libraries
  where owner not in ('SYS','XDB','MDSYS','ORDSYS');
-select owner||  data_type,
-	 to_char(count(*), '999,999,999')||
-	 to_char(max(DATA_LENGTH), '999,999,999')||
-	 to_char(max(DATA_PRECISION), '999,999,999')
+select owner,  data_type,
+	 to_char(count(*), '999,999,999') as count,
+	 to_char(max(DATA_LENGTH), '999,999,999') as data_length,
+	 to_char(max(DATA_PRECISION), '999,999,999') as data_precision
   from all_tab_columns
  where owner not in ('SYS','XDB','MDSYS','ORDSYS')
  group by owner, data_type
@@ -660,8 +662,8 @@ select /*+ rule */ job, sid, last_date,failures
   from dba_jobs_running;
 select * from
 (SELECT l.log_id,           l.job_name, 
-            TO_CHAR (l.log_date, 'YYYY/MM/DD HH24:MI:SS.FF TZH:TZM'), 
-            TO_CHAR (r.actual_start_date,'YYYY/MM/DD HH24:MI:SS.FF TZH:TZM'),
+            TO_CHAR (l.log_date, 'YYYY/MM/DD HH24:MI:SS.FF TZH:TZM') as log_date, 
+            TO_CHAR (r.actual_start_date,'YYYY/MM/DD HH24:MI:SS.FF TZH:TZM') as start_date,
             r.status,           r.errors
   FROM dba_scheduler_job_log l, dba_scheduler_job_run_details r 
  WHERE l.log_id = r.log_id(+)
@@ -705,9 +707,11 @@ from v$parameter
 where isdefault ='FALSE'
 order by name; 
 
-select name parameter_name, value
+SELECT * FROM
+(select name as all_parameters, value
 from v$parameter
-order by name; 
+order by name)
+WHERE ROWNUM <=99;
 
 
 select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources

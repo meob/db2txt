@@ -1,11 +1,11 @@
 select 'my2txt: MySQL TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
-       'v.1.0.0' as version;
+       'v.1.0.1' as version;
 
 
 use information_schema;
-select 'Version :' as item, version() as value
+select 'Version :' as summary_info, version() as value
 union all
 select 'Created :', min(create_time)
 from tables
@@ -72,7 +72,7 @@ select ' Desupported (MySQL):   8.3.0, 8.2.0, 8.1.0; 5.7.44, 5.6.51, 5.5.62, 5.1
 union all
 select ' Desupported (MariaDB): 10.9.8, 10.8.8, 10.7.8, 10.3.39, 10.2.44, 10.1.48, 10.0.38, 5.5.68';
 
-select sk as "database",
+select sk as schema_matrix,
        sum(if(otype='T',1,0)) as tables,
        sum(if(otype='I',1,0)) as indexes,
        sum(if(otype='R',1,0)) as routines,
@@ -179,7 +179,7 @@ select table_schema,
  group by table_schema, table_name, subpartition_name, partition_method, subpartition_method
  order by table_schema, table_name, subpartition_name;
 
-SELECT user, 
+SELECT user as user_list, 
        host,
        CONCAT(Select_priv, Lock_tables_priv,' ',
        Insert_priv, Update_priv, Delete_priv, ' ', Create_priv, Drop_priv,
@@ -417,7 +417,7 @@ group by user
 order by 2 desc;
 
 SELECT id, user, host, db, command, time,
-       state, substr(replace(info, '\n', ' ') ,1,64) as stmt
+       state, substr(replace(info, '\n', ' ') ,1,64) as current_query
 from performance_schema.processlist
 order by id;
 
@@ -624,12 +624,12 @@ SELECT FILE_NAME,EVENT_NAME, COUNT_STAR, SUM_TIMER_WAIT,
 SELECT SCHEMA_NAME, COUNT_STAR, 
  SUM_TIMER_WAIT, SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time, 
  round(AVG_TIMER_WAIT/1000000000000,3) AVG_TIMER_WAIT, 
- SUM_ROWS_SENT, concat('\n', substring(DIGEST_TEXT, 1, 128)) as stmt
+ SUM_ROWS_SENT, concat('\n', substring(DIGEST_TEXT, 1, 128)) as query_top20
   from performance_schema.events_statements_summary_by_digest order by SUM_TIMER_WAIT desc limit 20;
 SELECT SCHEMA_NAME, COUNT_STAR, 
  SUM_TIMER_WAIT, SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time, 
  round(AVG_TIMER_WAIT/1000000000000,3) AVG_TIMER_WAIT, 
- SUM_ROWS_SENT, concat('\n', substring(DIGEST_TEXT, 1, 128)) as stmt
+ SUM_ROWS_SENT, concat('\n', substring(DIGEST_TEXT, 1, 128)) as query_slow
   from performance_schema.events_statements_summary_by_digest order by AVG_TIMER_WAIT desc limit 5;
 
 SELECT table_schema,
@@ -751,7 +751,7 @@ SELECT concat(event_schema,'.',event_name) as event_name,
    status,
    event_type,
    ifnull(execute_at,'') as exec_at,
-   ifnull(interval_value,'') as interval, ifnull(interval_field,'') as interval_unit,
+   ifnull(interval_value,'') as interval_value, ifnull(interval_field,'') as interval_unit,
    event_definition
   from events;
 
@@ -772,20 +772,19 @@ SELECT  'TOTAL',  CHARACTER_SET_NAME,  COLLATION_NAME,  count(*)
    and CHARACTER_SET_NAME is not null
  group by CHARACTER_SET_NAME , COLLATION_NAME;
 
-SELECT  variable_name as global_variable, variable_value as value
+SELECT  variable_name as global_status, variable_value as value
   from performance_schema.global_variables
- where variable_name not in('server_audit_loc_info', 'Caching_sha2_password_rsa_public_key', 'optimizer_switch', 'sql_mode')
+ where variable_name not in('server_audit_loc_info', 'Caching_sha2_password_rsa_public_key', 'optimizer_switch', 'sql_mode', 'wsrep_provider_options')
  order by variable_name;
-SELECT  variable_name as global_variable, variable_value as value
+SELECT  variable_name as global_status, variable_value as value
   from performance_schema.global_variables
- where variable_name in('server_audit_loc_info', 'optimizer_switch', 'sql_mode')
+ where variable_name in('server_audit_loc_info', 'optimizer_switch', 'sql_mode', 'wsrep_provider_options')
  order by variable_name;
 SELECT  variable_name as status_variable, variable_value as value
   from performance_schema.global_status
  where variable_name not in('Caching_sha2_password_rsa_public_key','Rsa_public_key')
  order by variable_name;
 
-sel
-ect 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
+select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', now()) as report_date;
 
