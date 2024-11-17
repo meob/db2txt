@@ -1,7 +1,7 @@
 select 'pg2txt: PostgreSQL TXT-Report on: '||current_database() as title,
        now() as report_date,
        user as by_user,
-       'v.1.0.1' as version;
+       'v.1.0.3' as version;
 
 
 select 'Database :' as summary_info, current_database() as value
@@ -58,9 +58,9 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 16.4, 15.8, 14.13, 13.16, 12.20'
+select ' Latest Releases: 17.1, 16.5, 15.9, 14.14, 13.17'
 union all
-select ' Desupported:     11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
+select ' Desupported:     12.21, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
 select '                  9.1.24, 9.0.23,8.4.21, 8.3.23, 8.2.23, 8.1.23, 8.0.26, 7.4.30, 6.5.3';
 
@@ -78,7 +78,7 @@ from pg_database;
 (select nspname as schema_matrix, rolname as owner,
  sum(case when relkind='r' THEN 1 ELSE 0 end) as table,
  sum(case when relkind='i' THEN 1 ELSE 0 end) as index,
- sum(case when relkind='p' THEN 1 ELSE 0 end) as p_table,
+ sum(case when relkind='p' THEN 1 ELSE 0 end) as p_tab,
  sum(case when relkind='I' THEN 1 ELSE 0 end) as p_idx,
  sum(case when relkind='v' THEN 1 ELSE 0 end) as view,
  sum(case when relkind='S' THEN 1 ELSE 0 end) as seq,
@@ -88,7 +88,7 @@ from pg_database;
  sum(case when relkind='m' THEN 1 ELSE 0 end) as mat_view,
  count(*) as TOTAL,
  sum(case when relkind in ('r','p') THEN case when relispartition then 1 else 0 end else 0 end) as part,
- sum(case when relkind in ('r','p') THEN case when relispartition then 0 else 1 end else 0 end) as not_part,
+ sum(case when relkind in ('r','p') THEN case when relispartition then 0 else 1 end else 0 end) as n_part,
  sum(case when relpersistence='u' THEN 1 ELSE 0 end) as unlog,
  sum(case when relpersistence='t' THEN 1 ELSE 0 end) as temp
 from pg_class, pg_roles, pg_namespace
@@ -425,11 +425,11 @@ select pid,
        client_addr,
        to_char(backend_start, 'YYYY-MM-DD HH24:MI:SS') as session_start,
        state,
-       to_char(query_start, 'YYYY-MM-DD HH24:MI:SS') as query_start,
+       to_char(query_start, 'YYYY-MM-DD HH24:MI:SS') as start,
        now()-query_start as duration,
        backend_type,
-       application_name,
-       E''||replace(query, chr(10), ' ') as current_query
+       application_name as application,
+       E''||replace(query, chr(10), ' ') as query
   from pg_stat_activity
  where pid<>pg_backend_pid()
  order by state, query_start, pid;
@@ -439,7 +439,7 @@ SELECT 'Blocking' as locks, blocked_locks.pid AS blocked_pid,
        blocking_locks.pid AS blocking_pid,
        blocking_activity.usename AS blocking_user,
        blocked_activity.query AS blocked_statement,
-       blocking_activity.query AS current_statement_in_blocking_process
+       blocking_activity.query AS blocking_process_statement
   FROM pg_catalog.pg_locks blocked_locks
        JOIN pg_catalog.pg_stat_activity blocked_activity  ON blocked_activity.pid = blocked_locks.pid
        JOIN pg_catalog.pg_locks blocking_locks ON blocking_locks.locktype = blocked_locks.locktype
@@ -507,13 +507,13 @@ select datname as database,
     xact_rollback, 
     blks_read, 
     blks_hit, 
-   round((blks_hit)*100.0/nullif(blks_read+blks_hit, 0),2) as hit_ratio, 
+    round((blks_hit)*100.0/nullif(blks_read+blks_hit, 0),2) as hit_ratio, 
     tup_returned, 
     tup_fetched, 
     tup_inserted, 
     tup_updated, 
     tup_deleted,
-     stats_reset
+    to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
 from pg_stat_database
 where datname not like 'template%';
 
@@ -526,7 +526,7 @@ select checkpoints_timed,
      buffers_alloc,
      round(checkpoint_write_time/1000),
      round(checkpoint_sync_time/1000),
-     stats_reset
+     to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
  from pg_stat_bgwriter;
 
 select round(100.0*checkpoints_timed/nullif(checkpoints_req+checkpoints_timed,0),2) as timed_CP_ratio_pct,
@@ -1011,10 +1011,10 @@ select name as all_parameters,
    min_val, max_val,
    context,
    unit, source,
-   setting, category --, short_desc
+   setting, substring(category,1,40)  as category --, short_desc
 from pg_settings
-order by name; 
-
+order by name
+limit 29; 
 
 select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', now()) as report_date;
