@@ -1,7 +1,7 @@
 select 'pg2txt: PostgreSQL TXT-Report on: '||current_database() as title,
        now() as report_date,
        user as by_user,
-       'v.1.0.3' as version;
+       'v.1.0.5' as version;
 
 
 select 'Database :' as summary_info, current_database() as value
@@ -58,7 +58,7 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 17.1, 16.5, 15.9, 14.14, 13.17'
+select ' Latest Releases: 17.3, 16.7, 15.11, 14.16, 13.19'
 union all
 select ' Desupported:     12.21, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
@@ -515,7 +515,22 @@ select datname as database,
     tup_deleted,
     to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
 from pg_stat_database
-where datname not like 'template%';
+where datname not like 'template%'
+order by datname;
+
+-- Requires PG14+
+select datname as database,
+       sum(calls) as calls,
+       round(sum(total_exec_time)) as total_exec_time,
+       round(sum( (calls)/(EXTRACT(EPOCH FROM (now()-stats_reset))) )::numeric,3) Exec_sec,
+       round(sum( (total_exec_time)/(EXTRACT(EPOCH FROM (now()-stats_reset))*1000) )::numeric,5) DBcpu,
+       to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
+  from pg_stat_statements, pg_database, pg_stat_statements_info
+ where pg_stat_statements.dbid=pg_database.oid
+   and pg_stat_statements.toplevel
+   and datname not like 'template%'
+ group by datname, stats_reset
+order by datname;
 
 select checkpoints_timed, 
      checkpoints_req, 
@@ -1016,5 +1031,5 @@ from pg_settings
 order by name
 limit 29; 
 
-select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
+select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', now()) as report_date;
