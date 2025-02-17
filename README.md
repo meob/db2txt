@@ -104,7 +104,7 @@ If you want more information and better formatted results use db2html HTML scrip
 
 # LICENSE
 
-Copyright 2024 meob
+Copyright 2025 meob
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
