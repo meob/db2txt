@@ -1,7 +1,7 @@
 select 'ch2txt: ClickHouse TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
-       'v.1.0.1' as version;
+       'v.1.0.2' as version;
 
 
 use system;
@@ -66,9 +66,9 @@ select toString(value), 2
   from system.metrics
  where metric='VersionInteger'
 union all
-select ' Latest Releases:  24.7.3.42, 24.3.7.30-lts, 23.8.16.40−lts, 23.3.22.3−lts', 3
+select ' Latest Releases:  25.3.2.39-lts, 25.2.2.39, 24.8.14.39-lts, 24.3.18.7-lts', 3
 union all
-select ' Desupported:      22.8.21.38-lts, 22.3.20.29−lts, 21.8.15.7-lts', 4)
+select ' Desupported:      23.8.16.40−lts, 23.3.22.3−lts, 22.8.21.38-lts, 22.3.20.29−lts, 21.8.15.7-lts', 4)
 order by ord;
 
 select  sk as schema_matrix,
@@ -589,24 +589,24 @@ select name, code, value,
 select name as all_parameters, value, changed
   from system.settings
  order by changed desc, name
- limit 20;
+ limit 29;
 
 select metric as global_status, value,  description
   from system.metrics
  order by metric
- limit 20;
+ limit 29;
 
 select metric, value
   from system.asynchronous_metrics
  order by metric
- limit 20;
+ limit 29;
 
 select event, value, description
   from system.events
  order by event
- limit 20;
+ limit 29;
 
 
-select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
+select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', toString(now())) as report_date;
 

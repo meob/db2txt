@@ -1,9 +1,9 @@
 # db2txt
-Useful SQL scripts for DBA and DEV.
+Useful SQL scripts for DBAs and DEVs.
 
 These pure SQL, simple, textual, database configuration and statistics scripts
 can be used from any client to extract most intresting information for DBAs and DEVs.
-Currently MySQL, PostgreSQL, Oracle, ClickHouse scripts are available.
+Currently MySQL, PostgreSQL, Oracle, ClickHouse, and SQL Server scripts are available.
 
 ## Sections
 
@@ -23,6 +23,9 @@ there are common sections for all databases:
 * `all_parameters` all database parameters
 * `global_status` database status details
 
+Some queries can have a large number of records (eg. all_parameters)
+and had been limited to 29 row; of course le limit can be easly removed.
+
 
 ## Usage
 
@@ -31,16 +34,17 @@ Any SQL client program can be used to execute the 2TXT-Report scripts.
 With DBeaver choose the database you want to use (superadmin rights are suggested),
 from the "SQL Editor" create a "New SQL Script", paste the 2TXT-Report script,
 toggle "Show results in single tab", activate the "SQL Terminal" output tab,
-and finally "Execute SQL script" !
+and finally "Execute SQL script".
+![DBeaver usage](db2txt4DBeaver.jpg "DBeaver usage")
 
-Scripts can also be used with native clients too as described in the following sections.
+Scripts can also be used with native clients as described in the following sections.
 
 
 ### MySQL
 
 The script can be executed from the native client too:
 
-	mysql -p$PWD  --force -t  <my2txt.sql  2>/dev/null  >my2txt.txt 
+	mysql  -p$PWD  --force -t  <my2txt.sql  2>/dev/null  >my2txt.txt 
 
 All the provided sections are present for MySQL.
 
@@ -53,7 +57,7 @@ error with previous MySQL versions.
 
 The script can be executed from the native client too:
 
-	psql [database]  <pg2txt.sql  2>/dev/null   >pg2txt.txt 
+	psql  [database]  <pg2txt.sql  2>/dev/null   >pg2txt.txt 
 
 If already connected with psql the following options give a better formatting:
 
@@ -66,7 +70,7 @@ dead tuples, bloat and vacuum execution; `index_issue` to detect missing indexes
 There is not a `global_status` section since PostgreSQL uses several different system views
 we collected in the `tuning_parameters` section.
 
-Supported version is 16 but pg2txt is known to work quite well with all supported versions.
+Supported version is 17 but pg2txt is known to work quite well with all supported versions.
 Column `toplevel` in `pg_stat_statements` in available in PG 14+, comment it out if using a previous PG version.
 
 
@@ -76,7 +80,7 @@ The script can be executed from the native client too:
 
 	sqlplus / as sysdba  <ora2txt.sql  2>/dev/null  >ora2txt.txt 
 
-Supported version is 19c but ora2txt is known to work with other versions too even if 12c+ is suggested.
+Supported version is 19c but ora2txt is known to work with other versions too, even if 12c+ is suggested.
 
 
 ### ClickHouse
@@ -85,20 +89,36 @@ The script can be executed from the native client too:
 
 	clickhouse-client -mn --ignore-error -f PrettyCompactMonoBlock --ask-password <ch2txt.sql  2>/dev/null  >ch2txt.txt 
 
-`all_parameters` and `global_status` sections queries are limited to 20 since the number
+`all_parameters` and `global_status` sections queries are limited to 29 since the number
 of available options and statistic is very high in ClickHouse; of course the limit can
 be removed if need.
 
 Supported version is 24.8.*-lts but ch2txt is known to work well with other versions too.
 
 
+### SQL Server
+
+The script can be executed from the native client too:
+
+	sqlcmd -S serverName\instanceName,1433 -E -d dbName -y 5 -Y 20 -i sql2txt.sql > sql2txt.txt 
+
+`global_status` sections queries are limited to 29 since the number
+of available statistic is very high. The limit can be removed if need.
+
+Supported version is 16.0 (SQL Server 2022) but sql2txt is known to work well with other versions too.
+
+
 ## Limits
 
-These are easy SQL scripts: they report only the most intresting information,
-only recent, supported and widely used versions are supported
-(even if they may work also with older an newer versions), ...
+These are easy SQL scripts: they report only the most intresting information.
+Only recent, supported and widely used versions are supported
+even if the scripts generally work well also with older or newer versions, forks, compatible DBs, ...
 
-If you want more information and better formatted results use db2html HTML scripts available on
+The source code of **db2txt** scripts is published on
+[https://github.com/meob/db2txt](https://github.com/meob/db2txt).
+
+If you want more information, version/fork specific queries, and better formatted results...
+use **db2html** HTML scripts available on
 [https://github.com/meob/db2html](https://github.com/meob/db2html).
 
 

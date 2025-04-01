@@ -1,7 +1,7 @@
 select 'ora2txt: Oracle TXT-Report on: '|| value||' ' as title,
        to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') as report_date,
        user as by_user,
-       'v.1.0.1' as version
+       'v.1.0.2' as version
   from v$parameter
  where name like 'db_name';
 
@@ -95,7 +95,7 @@ select banner as version
  from v$version
  where banner like 'Oracle%'
 union all
-select ' Last Release Updates (12.2+): 23.4, 21.15, 19.24; 20.2, 18.14, 12.2.0.1.220118' from dual
+select ' Last Release Updates (12.2+): 23.6, 21.17, 19.26; 20.2, 18.14, 12.2.0.1.220118' from dual
 union all
 select ' Last Patch Set Updates (12.1-): 12.1.0.2.221018, 11.2.0.4.201020, 10.2.0.5.19; 9.2.0.8, 8.1.7.4, 7.3.4.5' from dual
 union all
@@ -437,10 +437,10 @@ select s.sid||','||s.serial# sid_serial,
    97,'Create PKG Body',98,'Alter PKG Body',99,'Drop PKG Body',
    0,'No command',
    'Other') Command,
-       substr(s.program,1,64) program,
-       module,
+       substr(s.program,1,30) program,
+       substr(module,1,30) module,
        s.inst_id,
-       to_char(logon_time, 'YYYY-MM-DD HH24:MI:SS'),
+       to_char(logon_time, 'YYYY-MM-DD HH24:MI:SS') as logon,
        s.client_identifier
   from gv$process p, gv$session s
  where s.paddr = p.addr
@@ -588,9 +588,42 @@ select 'I4 @'||gv$sysstat.inst_id||') Exec: '||to_char(value) ||
  union
 select 'L1 @'||gv$sysstat.inst_id||') DBcpu: '||to_char( round((value/100)/((sysdate-startup_time)*24*60*60),5) )  
  from gv$sysstat,gv$instance
- where name in ('DB time') and gv$sysstat.inst_id=gv$instance.inst_id
-;
+ where name in ('DB time') and gv$sysstat.inst_id=gv$instance.inst_id;
 
+
+select * from 
+(select buffer_gets, disk_reads, executions, round(elapsed_time/executions/1000000,3) avg_duration,
+        parsing_schema_name, sql_id, substr(sql_text,1,80) sql_text
+   from v$sqlarea a
+  where parsing_schema_name NOT IN ('SYS', 'SYSTEM', 'RDSADMIN')
+    and executions>0
+  order by 1 desc)
+where  rownum <=10;
+select * from 
+(select disk_reads, buffer_gets, executions, round(elapsed_time/executions/1000000,3) avg_duration,
+        parsing_schema_name, sql_id, substr(sql_text,1,80) sql_text
+   from v$sqlarea a
+  where parsing_schema_name NOT IN ('SYS', 'SYSTEM', 'RDSADMIN')
+    and executions>0
+  order by 1 desc)
+where  rownum <=10;
+
+select * from 
+(select cpu_time, elapsed_time, executions, round(elapsed_time/executions/1000000,3) avg_duration, 
+        parsing_schema_name, sql_id, substr(sql_text,1,80) sql_text
+   from v$sqlarea a
+  where parsing_schema_name NOT IN ('SYS', 'SYSTEM', 'RDSADMIN')
+    and executions>0
+  order by 1 desc)
+where  rownum <=10;
+select * from 
+(select elapsed_time, cpu_time, executions, round(elapsed_time/executions/1000000,3) avg_duration, 
+        parsing_schema_name, sql_id, substr(sql_text,1,80) sql_text
+   from v$sqlarea a
+  where parsing_schema_name NOT IN ('SYS', 'SYSTEM', 'RDSADMIN')
+    and executions>0
+  order by 1 desc)
+where  rownum <=10;
 
 select OWNER, count(*) as stale_stat_count, max(to_char(LAST_ANALYZED, 'YYYY-MM-DD HH24:MI:SS')) as last_analyzed
 from dba_tab_statistics
@@ -711,10 +744,10 @@ SELECT * FROM
 (select name as all_parameters, value
 from v$parameter
 order by name)
-WHERE ROWNUM <=99;
+WHERE ROWNUM <=29;
 
 
-select 'Copyright 2024 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources
+select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources
   from dual;
 select 'Report terminated on: '|| to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') as report_date
   from dual;

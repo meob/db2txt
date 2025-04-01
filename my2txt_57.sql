@@ -1,4 +1,4 @@
-select 'my2txt: MySQL TXT-Report ' as title,
+select 'my2txt_57: MySQL TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
        'v.1.0.2' as version;
@@ -37,10 +37,10 @@ select 'Defined Tables :', format(count(*),0)
 from tables
 union all
 select 'Sessions :', format(count(*),0)
-  from performance_schema.processlist
+  from information_schema.processlist
  union all
 select 'Sessions (active) :', format(count(*),0)
-  from performance_schema.processlist
+  from information_schema.processlist
  where command <> 'Sleep'
 union all
 select 'Questions (#/sec.) :', format(g1.variable_value/g2.variable_value,5)
@@ -411,18 +411,18 @@ order by 3, 1;
 SELECT  engine,
        support,
        comment
-from engines
-order by support;
+  from engines
+ order by support;
 
 SELECT user, count(*) connections
-from performance_schema.processlist
-group by user
-order by 2 desc;
+  from information_schema.processlist
+ group by user
+ order by 2 desc;
 
 SELECT id, user, host, db, command, time,
        state, substr(replace(info, '\n', ' ') ,1,64) as current_query
-from performance_schema.processlist
-order by id;
+  from information_schema.processlist
+ order by id;
 
 SELECT trx_mysql_thread_id, trx_id, trx_state, trx_started, trx_weight,
        trx_requested_lock_id, trx_query, trx_operation_state, trx_isolation_level
@@ -589,39 +589,39 @@ where g1.variable_name='INNODB_LOG_WAITS'
 union all
 select concat( g1.variable_name, ' MB/hour '),
        format((g1.variable_value*60*60)/(g2.variable_value*1024*1024),5),  '', 'Tune INNODB_LOG_FILE_SIZE'
-from performance_schema.global_status g1, performance_schema.global_status g2
-where g1.variable_name='INNODB_OS_LOG_WRITTEN'
-  and g2.variable_name='UPTIME'
-  and (g1.variable_value*60*60)/(g2.variable_value*1024*1024)>5;
+  from performance_schema.global_status g1, performance_schema.global_status g2
+ where g1.variable_name='INNODB_OS_LOG_WRITTEN'
+   and g2.variable_name='UPTIME'
+   and (g1.variable_value*60*60)/(g2.variable_value*1024*1024)>5;
 
 SELECT EVENT_NAME,  COUNT_STAR,  SUM_TIMER_WAIT,
-         SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time
+       SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time
   from performance_schema.events_statements_summary_global_by_event_name
  where count_star > 0 
  order by SUM_TIMER_WAIT desc 
  limit 10;
 SELECT EVENT_NAME,  COUNT_STAR,  SUM_TIMER_WAIT,
-         SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000)  hr_time
+       SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000)  hr_time
   from performance_schema.events_waits_summary_global_by_event_name  
  where count_star > 0 
    and event_name != 'idle'
  order by SUM_TIMER_WAIT desc 
  limit 10;
 SELECT OBJECT_TYPE,  OBJECT_SCHEMA,  OBJECT_NAME,
-         COUNT_STAR,   SUM_TIMER_WAIT,
-         SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time
+       COUNT_STAR,   SUM_TIMER_WAIT,
+       SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time
   from performance_schema.table_lock_waits_summary_by_table
  where count_star > 0 
  order by SUM_TIMER_WAIT desc 
  limit 10;
 SELECT EVENT_NAME, COUNT_STAR, SUM_TIMER_WAIT,
-         SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time
+       SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time
   from performance_schema.file_summary_by_event_name order by SUM_TIMER_WAIT desc limit 10;
 
 SELECT FILE_NAME,EVENT_NAME, COUNT_STAR, SUM_TIMER_WAIT, 
- SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time, 
- COUNT_READ, SUM_TIMER_READ, SUM_NUMBER_OF_BYTES_READ, 
- COUNT_WRITE, SUM_TIMER_WRITE, SUM_NUMBER_OF_BYTES_WRITE
+       SEC_TO_TIME(SUM_TIMER_WAIT/1000000000000) hr_time, 
+       COUNT_READ, SUM_TIMER_READ, SUM_NUMBER_OF_BYTES_READ, 
+       COUNT_WRITE, SUM_TIMER_WRITE, SUM_NUMBER_OF_BYTES_WRITE
   from performance_schema.file_summary_by_instance order by SUM_TIMER_WAIT desc limit 10;
 
 SELECT SCHEMA_NAME, COUNT_STAR, 
@@ -637,12 +637,12 @@ SELECT SCHEMA_NAME, COUNT_STAR,
 
 SELECT table_schema,
        table_name,
-	'T',engine,
-	format(data_length+index_length,0),
-	format(table_rows,0)
-from  information_schema.tables
-order by data_length+index_length desc
-limit 32;
+       'T',engine,
+       format(data_length+index_length,0),
+       format(table_rows,0)
+  from information_schema.tables
+ order by data_length+index_length desc
+ limit 32;
 
 SELECT HOST,  CURRENT_CONNECTIONS,  TOTAL_CONNECTIONS
   from performance_schema.hosts

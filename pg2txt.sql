@@ -1,7 +1,7 @@
 select 'pg2txt: PostgreSQL TXT-Report on: '||current_database() as title,
        now() as report_date,
        user as by_user,
-       'v.1.0.5' as version;
+       'v.1.0.6' as version;
 
 
 select 'Database :' as summary_info, current_database() as value
@@ -58,9 +58,9 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 17.3, 16.7, 15.11, 14.16, 13.19'
+select ' Latest Releases: 17.4, 16.8, 15.12, 14.17, 13.20'
 union all
-select ' Desupported:     12.21, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
+select ' Desupported:     12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
 select '                  9.1.24, 9.0.23,8.4.21, 8.3.23, 8.2.23, 8.1.23, 8.0.26, 7.4.30, 6.5.3';
 
@@ -823,7 +823,7 @@ select name as tuning_parameter,
                'autovacuum_vacuum_cost_limit', 'autovacuum_vacuum_cost_delay') 
  order by name; 
 
-select relname as table,
+select relname as biggest_objects,
  case WHEN relkind='r' THEN 'Table' 
     WHEN relkind='i' THEN 'Index'
     WHEN relkind='t' THEN 'TOAST Table'
