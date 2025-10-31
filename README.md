@@ -17,14 +17,14 @@ there are common sections for all databases:
 * `current_query` reports most intresting information about current database avtivities
 * `locks` reports current locks giving precedence to blocking locks
 * `tuning_parameters` most intresting tuning parameters and statistics
-* `query_top20` most time consuming queries
+* `query_top20` top time consuming queries
 * `replication` replication and similar features are reported in this section
 * `biggest_objects` space usage from different points of view
 * `all_parameters` all database parameters
 * `global_status` database status details
 
 Some queries can have a large number of records (eg. all_parameters)
-and had been limited to 29 row; of course le limit can be easly removed.
+and have been limited to 29 rows; of course the limit can be easly changed to better suite your needs.
 
 
 ## Usage
@@ -57,7 +57,7 @@ error with previous MySQL versions.
 
 The script can be executed from the native client too:
 
-	psql  [database]  <pg2txt.sql  2>/dev/null   >pg2txt.txt 
+	psql  [database] --pset=footer=off <pg2txt.sql  2>/dev/null   >pg2txt.txt 
 
 If already connected with psql the following options give a better formatting:
 
@@ -71,7 +71,7 @@ There is not a `global_status` section since PostgreSQL uses several different s
 we collected in the `tuning_parameters` section.
 
 Supported version is 17 but pg2txt is known to work quite well with all supported versions.
-Column `toplevel` in `pg_stat_statements` in available in PG 14+, comment it out if using a previous PG version.
+Column `toplevel` in `pg_stat_statements` is available since PG14, comment it out if using a previous PG version.
 
 
 ### Oracle
@@ -112,7 +112,7 @@ Supported version is 16.0 (SQL Server 2022) but sql2txt is known to work well wi
 
 These are easy SQL scripts: they report only the most intresting information.
 Only recent, supported and widely used versions are supported
-even if the scripts generally work well also with older or newer versions, forks, compatible DBs, ...
+even if the scripts generally work well also with older or newer versions, forks, compatible DBs, cloud service, ...
 
 The source code of **db2txt** scripts is published on
 [https://github.com/meob/db2txt](https://github.com/meob/db2txt).

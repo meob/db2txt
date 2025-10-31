@@ -1,7 +1,7 @@
 select 'ch2txt: ClickHouse TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
-       'v.1.0.2' as version;
+       'v.1.0.3' as version;
 
 
 use system;
@@ -66,7 +66,7 @@ select toString(value), 2
   from system.metrics
  where metric='VersionInteger'
 union all
-select ' Latest Releases:  25.3.2.39-lts, 25.2.2.39, 24.8.14.39-lts, 24.3.18.7-lts', 3
+select ' Latest Releases:  25.9.5.21, 25.8.11.66-lts, 25.3.8.23-lts; 24.8.14.39-lts, 24.3.18.7-lts', 3
 union all
 select ' Desupported:      23.8.16.40−lts, 23.3.22.3−lts, 22.8.21.38-lts, 22.3.20.29−lts, 21.8.15.7-lts', 4)
 order by ord;

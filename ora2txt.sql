@@ -1,7 +1,7 @@
 select 'ora2txt: Oracle TXT-Report on: '|| value||' ' as title,
        to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') as report_date,
        user as by_user,
-       'v.1.0.2' as version
+       'v.1.0.3' as version
   from v$parameter
  where name like 'db_name';
 
@@ -95,7 +95,7 @@ select banner as version
  from v$version
  where banner like 'Oracle%'
 union all
-select ' Last Release Updates (12.2+): 23.6, 21.17, 19.26; 20.2, 18.14, 12.2.0.1.220118' from dual
+select ' Last Release Updates (12.2+): <b>23.26.0</b>, 21.20, <b>19.29</b>; 20.2, 18.14, 12.2.0.1.220118' from dual
 union all
 select ' Last Patch Set Updates (12.1-): 12.1.0.2.221018, 11.2.0.4.201020, 10.2.0.5.19; 9.2.0.8, 8.1.7.4, 7.3.4.5' from dual
 union all

@@ -1,7 +1,7 @@
 select 'my2txt: MySQL TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
-       'v.1.0.2' as version;
+       'v.1.0.3' as version;
 
 use information_schema;
 select 'Version :' as summary_info, version() as value
@@ -63,15 +63,15 @@ select 'Port :', variable_value
 
 select version() as version
 union all
-select ' Latest Releases (MySQL):   9.2.0, 8.4.4, 8.0.41'
+select ' Latest Releases (MySQL):   9.5.0, 8.4.7, 8.0.44'
 union all
-select ' Latest Releases (MariaDB): 11.7.2, 11.6.2, 11.5.2, 11.4.5, 10.11.11, 10.10.7, 10.6.21, 10.5.28'
+select ' Latest Releases (MariaDB): 12.0, 11.8.3, 11.7.2, 11.6.2, 11.5.2, 11.4.8, 10.11.14, 10.6.22, 10.5.29'
 union all
 select ' Latest Releases (Aurora): 3.08.1-8.0.39, 2.12.4-5.7.44'
 union all
-select ' Desupported (MySQL):   8.3.0, 8.2.0, 8.1.0; 5.7.44, 5.6.51, 5.5.62, 5.1.73, 5.0.96'
+select ' Desupported (MySQL):   8.4.0, 8.3.0, 8.2.0, 8.1.0; 5.7.44, 5.6.51, 5.5.62, 5.1.73, 5.0.96'
 union all
-select ' Desupported (MariaDB): 11.3.2, 11.2.6, 11.1.6, 11.0.6, 10.9.8, 10.8.8, 10.7.8, 10.4.34, 10.3.39, 10.2.44, 10.1.48, 10.0.38, 5.5.68'
+select ' Desupported (MariaDB): 11.3.2, 11.2.6, 11.1.6, 11.0.6, 10.10.7, 10.9.8, 10.8.8, 10.7.8, 10.4.34, 10.3.39, 10.2.44, 10.1.48, 10.0.38, 5.5.68'
 union all
 select ' Desupported (Aurora):  1.23.4-5.6';
 
@@ -170,7 +170,7 @@ select table_schema,
 
 select table_schema,
        table_name,
-       partition_method, ifnull(subpartition_method,''),
+       partition_method, ifnull(subpartition_method,'') as subpartition_method,
        count(distinct partition_name) as partitions,
        count(distinct subpartition_name) as subpartitions,
        min(partition_name) min_partition,
@@ -180,7 +180,8 @@ select table_schema,
   from partitions
  where partition_name is not null
  group by table_schema, table_name, subpartition_name, partition_method, subpartition_method
- order by table_schema, table_name, subpartition_name;
+ order by table_schema, table_name, subpartition_name
+ limit 29;
 
 SELECT user as user_list, 
        host,
