@@ -70,7 +70,7 @@ dead tuples, bloat and vacuum execution; `index_issue` to detect missing indexes
 There is not a `global_status` section since PostgreSQL uses several different system views
 we collected in the `tuning_parameters` section.
 
-Supported version is 17 but pg2txt is known to work quite well with all supported versions.
+Supported version is 18 but pg2txt is known to work quite well with all supported versions.
 Column `toplevel` in `pg_stat_statements` is available since PG14, comment it out if using a previous PG version.
 
 
@@ -91,9 +91,9 @@ The script can be executed from the native client too:
 
 `all_parameters` and `global_status` sections queries are limited to 29 since the number
 of available options and statistic is very high in ClickHouse; of course the limit can
-be removed if need.
+be removed if needed.
 
-Supported version is 24.8.*-lts but ch2txt is known to work well with other versions too.
+Supported version is 25.8.*-lts but ch2txt is known to work well with other versions too.
 
 
 ### SQL Server
@@ -103,7 +103,7 @@ The script can be executed from the native client too:
 	sqlcmd -S serverName\instanceName,1433 -E -d dbName -y 5 -Y 20 -i sql2txt.sql > sql2txt.txt 
 
 `global_status` sections queries are limited to 29 since the number
-of available statistic is very high. The limit can be removed if need.
+of available statistic is very high. The limit can be removed if needed.
 
 Supported version is 16.0 (SQL Server 2022) but sql2txt is known to work well with other versions too.
 

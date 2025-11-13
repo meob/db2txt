@@ -58,9 +58,9 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 18.0, 17.6, 16.10, 15.14, 14.19, 13.22'
+select ' Latest Releases: 18.1, 17.7, 16.11, 15.15, 14.20'
 union all
-select ' Desupported:     12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
+select ' Desupported:     13.23, 12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
 select '                  9.1.24, 9.0.23,8.4.21, 8.3.23, 8.2.23, 8.1.23, 8.0.26, 7.4.30, 6.5.3';
 
@@ -532,24 +532,30 @@ select datname as database,
  group by datname, stats_reset
 order by datname;
 
-select checkpoints_timed, 
-     checkpoints_req, 
-     buffers_checkpoint, 
-     buffers_clean, 
-     maxwritten_clean, 
-     buffers_backend, 
-     buffers_alloc,
-     round(checkpoint_write_time/1000),
-     round(checkpoint_sync_time/1000),
-     to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
- from pg_stat_bgwriter;
+select buffers_clean, 
+       maxwritten_clean, 
+       buffers_alloc,
+       to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
+  from pg_stat_bgwriter;
 
-select round(100.0*checkpoints_timed/nullif(checkpoints_req+checkpoints_timed,0),2) as timed_CP_ratio_pct,
-       round((extract('epoch' from now() - stats_reset)/60)::numeric/nullif(checkpoints_req+checkpoints_timed,0),2) as minutes_between_CP,
-       round(100.0*buffers_checkpoint/nullif(buffers_checkpoint + buffers_clean + buffers_backend,0),2) as clean_by_CP_pct,
-       round(100.0*buffers_clean/nullif(buffers_checkpoint + buffers_clean + buffers_backend,0),2) as clean_by_BGW_pct,
-       round(100.0*maxwritten_clean/nullif(buffers_clean,0),4) as BGW_alt_pct
- from pg_stat_bgwriter;
+-- Requires PG17+
+select num_timed, 
+       num_requested, 
+       restartpoints_timed, 
+       restartpoints_req, 
+       restartpoints_done, 
+       round(write_time/1000), 
+       round(sync_time/1000), 
+       to_char(stats_reset, 'YYYY-MM-DD HH24:MI:SS') as stats_reset
+  from pg_stat_checkpointer;
+
+-- Requires PG17+
+select round(100.0*num_timed/nullif(num_requested+num_timed,0),2),
+       round((extract('epoch' from now() - c.stats_reset)/60)::numeric/nullif(num_requested+num_timed,0),2),
+       round(100.0*buffers_written/nullif(buffers_written + buffers_clean,0),2),
+       round(100.0*buffers_clean/nullif(buffers_written + buffers_clean,0),2),
+       coalesce(round(100.0*maxwritten_clean/nullif(buffers_clean,0),4),0)
+ from pg_stat_bgwriter b, pg_stat_checkpointer c;
 
 SELECT 'Table' as object_type,
   sum(heap_blks_read) as heap_read,
