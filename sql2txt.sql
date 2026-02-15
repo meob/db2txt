@@ -268,7 +268,7 @@ SELECT TOP 29 substring(object_name, 1,30) as object_name, substring(counter_nam
   FROM sys.dm_os_performance_counters
  ORDER BY object_name, counter_name;
 
-select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
+select 'Copyright 2026 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select CURRENT_TIMESTAMP as report_date;
 
 

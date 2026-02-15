@@ -63,7 +63,7 @@ select 'Port :', variable_value
 
 select version() as version
 union all
-select ' Latest Releases (MySQL):   9.5.0, 8.4.7, 8.0.44'
+select ' Latest Releases (MySQL):   9.6.0, 8.4.8, 8.0.45'
 union all
 select ' Latest Releases (MariaDB): 12.0, 11.8.3, 11.7.2, 11.6.2, 11.5.2, 11.4.8, 10.11.14, 10.6.22, 10.5.29'
 union all
@@ -791,6 +791,6 @@ SELECT  variable_name as status_variable, variable_value as value
  where variable_name not in('Caching_sha2_password_rsa_public_key','Rsa_public_key')
  order by variable_name;
 
-select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
+select 'Copyright 2026 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', now()) as report_date;
 

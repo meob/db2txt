@@ -58,7 +58,7 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 18.1, 17.7, 16.11, 15.15, 14.20'
+select ' Latest Releases: 18.2, 17.8, 16.12, 15.16, 14.21'
 union all
 select ' Desupported:     13.23, 12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
@@ -1037,5 +1037,5 @@ from pg_settings
 order by name
 limit 29; 
 
-select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
+select 'Copyright 2026 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources;
 select concat('Report terminated on: ', now()) as report_date;

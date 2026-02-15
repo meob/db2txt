@@ -124,7 +124,7 @@ use **db2html** HTML scripts available on
 
 # LICENSE
 
-Copyright 2025 meob
+Copyright 2026 meob
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -95,7 +95,7 @@ select banner as version
  from v$version
  where banner like 'Oracle%'
 union all
-select ' Last Release Updates (12.2+): <b>23.26.0</b>, 21.20, <b>19.29</b>; 20.2, 18.14, 12.2.0.1.220118' from dual
+select ' Last Release Updates (12.2+): <b>23.26.1</b>, 21.20, <b>19.30</b>; 20.2, 18.14, 12.2.0.1.220118' from dual
 union all
 select ' Last Patch Set Updates (12.1-): 12.1.0.2.221018, 11.2.0.4.201020, 10.2.0.5.19; 9.2.0.8, 8.1.7.4, 7.3.4.5' from dual
 union all
@@ -244,7 +244,7 @@ select table_owner as owner, count(distinct table_name) as partitioned_tables
 select owner, degree, instances, count(*) as parallel_tables
  from dba_tables
  where owner not in ('SYS','SYSTEM','SYSMAN','WMSYS')
-   and degree>1
+   and degree>'1'
  group by degree, instances, owner
  order by degree desc, instances desc;
 
@@ -658,7 +658,7 @@ select segment_name,
        segment_type,
        owner,
        tablespace_name,
-       to_char(bytes,'999,999,999,999,999')
+       to_char(bytes,'999,999,999,999,999') as bytes
   from (select segment_name, segment_type,
         tablespace_name, owner, sum(bytes) bytes
         from sys.dba_extents
@@ -744,10 +744,10 @@ SELECT * FROM
 (select name as all_parameters, value
 from v$parameter
 order by name)
-WHERE ROWNUM <=29;
+-- WHERE ROWNUM <=29;
 
 
-select 'Copyright 2025 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources
+select 'Copyright 2026 meob' as copyright, 'Apache-2.0' as license, 'https://github.com/meob/db2txt' as sources
   from dual;
 select 'Report terminated on: '|| to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') as report_date
   from dual;
