@@ -63,13 +63,13 @@ select 'Port :', variable_value
 
 select version() as version
 union all
-select ' Latest Releases (MySQL):   9.6.0, 8.4.8, 8.0.45'
+select ' Latest Releases (MySQL):   9.7.0, 8.4.9, 8.0.46'
 union all
 select ' Latest Releases (MariaDB): 12.0, 11.8.3, 11.7.2, 11.6.2, 11.5.2, 11.4.8, 10.11.14, 10.6.22, 10.5.29'
 union all
 select ' Latest Releases (Aurora): 3.08.1-8.0.39, 2.12.4-5.7.44'
 union all
-select ' Desupported (MySQL):   8.4.0, 8.3.0, 8.2.0, 8.1.0; 5.7.44, 5.6.51, 5.5.62, 5.1.73, 5.0.96'
+select ' Desupported (MySQL):   8.3.0, 8.2.0, 8.1.0; 5.7.44, 5.6.51, 5.5.62, 5.1.73, 5.0.96'
 union all
 select ' Desupported (MariaDB): 11.3.2, 11.2.6, 11.1.6, 11.0.6, 10.10.7, 10.9.8, 10.8.8, 10.7.8, 10.4.34, 10.3.39, 10.2.44, 10.1.48, 10.0.38, 5.5.68'
 union all
@@ -695,17 +695,17 @@ SELECT CHANNEL_NAME, WORKER_ID, THREAD_ID,
 SELECT MEMBER_HOST, MEMBER_PORT, MEMBER_ID, MEMBER_STATE
   from performance_schema.replication_group_members;
 
-SELECT  VARIABLE_VALUE,  concat(member_host, ':', member_port) as member
+SELECT VARIABLE_VALUE,  concat(member_host, ':', member_port) as member
   FROM performance_schema.global_status
   JOIN performance_schema.replication_group_members
  WHERE VARIABLE_NAME= 'group_replication_primary_member'
    AND member_id=variable_value;
 
-SELECT  variable_name,  variable_value
+SELECT variable_name,  variable_value
   from performance_schema.global_variables
  where variable_name = 'server_uuid'
  order by variable_name;
-SELECT  variable_name,  variable_value
+SELECT variable_name,  variable_value
   from performance_schema.global_variables
  where variable_name like '%gtid%'
  order by variable_name;

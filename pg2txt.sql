@@ -58,7 +58,7 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 18.3, 17.9, 16.13, 15.17, 14.22'
+select ' Latest Releases: 18.4, 17.10, 16.14, 15.18, 14.23'
 union all
 select ' Desupported:     13.23, 12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
@@ -429,7 +429,7 @@ select pid,
        now()-query_start as duration,
        backend_type,
        application_name as application,
-       E''||replace(query, chr(10), ' ') as query
+       E''||replace(query, chr(10), ' ') as current_query
   from pg_stat_activity
  where pid<>pg_backend_pid()
  order by state, query_start, pid;
@@ -945,18 +945,18 @@ select name as replication_parameter, substring(setting, 1,80) as setting
                 'primary_slot_name', 'primary_conninfo', 'max_slot_wal_keep_size',
                 'vacuum_defer_cleanup_age')
  order by name; 
-select client_addr,  state,  sync_state,  txid_current_snapshot() as txid_current,
-        sent_lsn,      write_lsn, flush_lsn, replay_lsn,
-        to_char(backend_start, 'YYYY-MM-DD HH24:MI:SS') as backend_start,
-        write_lag, flush_lag, replay_lag
+select client_addr, state, sync_state, txid_current_snapshot() as txid_current,
+       sent_lsn, write_lsn, flush_lsn, replay_lsn,
+       to_char(backend_start, 'YYYY-MM-DD HH24:MI:SS') as backend_start,
+       write_lag, flush_lag, replay_lag
   from pg_stat_replication;
 select slot_name,  slot_type,  active,
-        xmin,  catalog_xmin,  restart_lsn
+       xmin,  catalog_xmin,  restart_lsn
   from pg_replication_slots;
 
 select now() - pg_last_xact_replay_timestamp() as last_replica,
         CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0
-                    ELSE EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp()) END as repl_delay,
+             ELSE EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp()) END as repl_delay,
         case when pg_is_in_recovery() then txid_current_snapshot() else null end as curren_snapshot,
         pg_last_wal_receive_lsn(),  
         pg_last_wal_replay_lsn();

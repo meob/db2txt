@@ -95,7 +95,7 @@ select banner as version
  from v$version
  where banner like 'Oracle%'
 union all
-select ' Last Release Updates (12.2+): <b>23.26.1</b>, 21.20, <b>19.30</b>; 20.2, 18.14, 12.2.0.1.220118' from dual
+select ' Last Release Updates (12.2+): <b>23.26.2</b>, 21.22, <b>19.31</b>; 20.2, 18.14, 12.2.0.1.220118' from dual
 union all
 select ' Last Patch Set Updates (12.1-): 12.1.0.2.221018, 11.2.0.4.201020, 10.2.0.5.19; 9.2.0.8, 8.1.7.4, 7.3.4.5' from dual
 union all
@@ -453,14 +453,14 @@ select s.sid||','||s.serial# sid_serial,
        q.parse_calls parse,
        q.disk_reads read,
        q.buffer_gets get  ,   
-       replace(replace(q.sql_text,'<','&lt;'),'>','&gt;') sql
-from gv$session s, gv$sql q
-where s.sql_address=q.address
-and   s.type <> 'BACKGROUND'
-and   s.status = 'ACTIVE'
-and   s.username <> 'SYS'
-and   s.inst_id = q.inst_id
-order by s.sid;
+       replace(replace(q.sql_text,'<','&lt;'),'>','&gt;') current_query
+  from gv$session s, gv$sql q
+ where s.sql_address=q.address
+   and   s.type <> 'BACKGROUND'
+   and   s.status = 'ACTIVE'
+   and   s.username <> 'SYS'
+   and   s.inst_id = q.inst_id
+ order by s.sid;
 
 select l.sid, l.type as lock_type, decode(l.lmode, 0, 'WAITING', 1,'Null', 2, 'Row Share', 
   3, 'Row Exclusive', 4, 'Share',
