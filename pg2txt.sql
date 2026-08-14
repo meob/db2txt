@@ -58,7 +58,7 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 18.4, 17.10, 16.14, 15.18, 14.23'
+select ' Latest Releases: 18.6, 17.11, 16.15, 15.19, 14.24'
 union all
 select ' Desupported:     13.23, 12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
