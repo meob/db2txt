@@ -1,7 +1,7 @@
 select 'my2txt: MySQL TXT-Report ' as title,
        now() as report_date,
        user() as by_user,
-       'v.1.0.3' as version;
+       'v.1.0.4' as version;
 
 use information_schema;
 select 'Version :' as summary_info, version() as value
@@ -63,13 +63,13 @@ select 'Port :', variable_value
 
 select version() as version
 union all
-select ' Latest Releases (MySQL):   9.7.2, 8.4.11'
+select ' Latest Releases (MySQL):    9.7.4, 8.4.13'
 union all
 select ' Latest Releases (MariaDB): 12.3.2, 11.8.8, 11.4.12, 10.11.18, 10.6.27'
 union all
 select ' Latest Releases (Aurora): 8.4.7, 3.08.1-8.0.39'
 union all
-select ' Desupported (MySQL):   8.3.0, 8.2.0, 8.1.0, 8.0.46; 5.7.44, 5.6.51, 5.5.62, 5.1.73, 5.0.96'
+select ' Desupported (MySQL):   9.6.0, 8.3.0, 8.2.0, 8.1.0, 8.0.46; 5.7.44, 5.6.51, 5.5.62, 5.1.73, 5.0.96'
 union all
 select ' Desupported (MariaDB):  11.7.2, 11.6.2, 11.5.2, 11.3.2, 11.2.6, 11.1.6, 11.0.6, 10.10.7, 10.9.8, 10.8.8, 10.7.8, 10.5.29, 10.4.34, 10.3.39, 10.2.44, 10.1.48, 10.0.38, 5.5.68'
 union all
