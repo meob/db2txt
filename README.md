@@ -70,7 +70,7 @@ dead tuples, bloat and vacuum execution; `index_issue` to detect missing indexes
 There is not a `global_status` section since PostgreSQL uses several different system views
 we collected in the `tuning_parameters` section.
 
-Supported version is 18 but pg2txt is known to work quite well with all supported versions.
+Supported version is 18 but pg2txt is known to work quite well with all supported versions and on many forks.
 Column `toplevel` in `pg_stat_statements` is available since PG14, comment it out if using a previous PG version.
 
 
@@ -80,7 +80,7 @@ The script can be executed from the native client too:
 
 	sqlplus / as sysdba  <ora2txt.sql  2>/dev/null  >ora2txt.txt 
 
-Supported version is 19c but ora2txt is known to work with other versions too, even if 12c+ is suggested.
+Supported version is 26ai but ora2txt is known to work with other versions too, even if 12c+ is suggested.
 
 
 ### ClickHouse
@@ -93,7 +93,7 @@ The script can be executed from the native client too:
 of available options and statistic is very high in ClickHouse; of course the limit can
 be removed if needed.
 
-Supported version is 25.8.*-lts but ch2txt is known to work well with other versions too.
+Supported version is 26.8.*-lts but ch2txt is known to work well with other versions too.
 
 
 ### SQL Server
