@@ -1,7 +1,7 @@
 select 'pg2txt: PostgreSQL TXT-Report on: '||current_database() as title,
        now() as report_date,
        user as by_user,
-       'v.1.0.7' as version;
+       'v.1.0.8' as version;
 
 
 select 'Database :' as summary_info, current_database() as value
@@ -58,9 +58,9 @@ select version() as version
 union all
 select current_setting('server_version_num')
 union all
-select ' Latest Releases: 18.6, 17.11, 16.15, 15.19, 14.24'
+select ' Latest Releases: 19.0, 18.7, 17.12, 16.16, 15.20'
 union all
-select ' Desupported:     13.23, 12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
+select ' Desupported:     14.25, 13.23, 12.22, 11.22, 10.23, 9.6.24, 9.5.25, 9.4.26, 9.3.25, 9.2.24,'
 union all
 select '                  9.1.24, 9.0.23,8.4.21, 8.3.23, 8.2.23, 8.1.23, 8.0.26, 7.4.30, 6.5.3';
 
